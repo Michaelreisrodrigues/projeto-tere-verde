@@ -18,7 +18,7 @@ const Login: React.FC = () => {
     try {
       await login({ username: email, password });
       toast.success('Login realizado com sucesso!');
-      navigate('/');
+      navigate('/admin');
     } catch (error) {
       toast.error('Email ou senha incorretos');
     } finally {

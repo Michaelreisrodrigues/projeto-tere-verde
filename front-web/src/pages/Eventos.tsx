@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, Calendar, MapPin, Loader2, Filter } from 'lucide-react';
 import { eventoService, parqueService } from '../services/api';
-import { imageStorage } from '../services/imageStorage';
 import { Evento, Parque } from '../types';
 import ImageGallery from '../components/ImageGallery';
 import toast from 'react-hot-toast';
@@ -37,16 +36,9 @@ const Eventos: React.FC = () => {
         return acc;
       }, {} as Record<number, string>);
       
-      // Carregar imagens do localStorage e mesclar com os dados
-      const todasImagens = imageStorage.getAllEventosImages();
-      const eventosComImagens = eventosData.map((evento: Evento) => ({
-        ...evento,
-        imagens: todasImagens[evento.id] || [],
-      }));
-      
       setParques(parquesMap);
-      setEventos(eventosComImagens);
-      setFilteredEventos(eventosComImagens);
+      setEventos(eventosData);
+      setFilteredEventos(eventosData);
     } catch (error) {
       toast.error('Erro ao carregar eventos');
     } finally {
@@ -61,7 +53,6 @@ const Eventos: React.FC = () => {
         evento.descricao.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Filtro por data
     if (dataFiltro) {
       filtered = filtered.filter((evento) => {
         const dataEvento = new Date(evento.data).toISOString().split('T')[0];
@@ -78,8 +69,6 @@ const Eventos: React.FC = () => {
     setDeleteId(id);
     try {
       await eventoService.delete(id);
-      // Remover imagens do localStorage
-      imageStorage.removeEventoImages(id);
       toast.success('Evento excluído com sucesso!');
       fetchData();
     } catch (error) {
@@ -116,7 +105,7 @@ const Eventos: React.FC = () => {
           <p className="text-gray-500 mt-1">Gerencie os eventos dos parques</p>
         </div>
         <Link
-          to="/eventos/novo"
+          to="/admin/eventos/novo"
           className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -127,7 +116,6 @@ const Eventos: React.FC = () => {
       {/* Filtros */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Busca por texto */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -139,7 +127,6 @@ const Eventos: React.FC = () => {
             />
           </div>
 
-          {/* Filtro por data */}
           <div className="relative sm:w-64">
             <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -150,7 +137,6 @@ const Eventos: React.FC = () => {
             />
           </div>
 
-          {/* Botão limpar filtros */}
           {(searchTerm || dataFiltro) && (
             <button
               onClick={limparFiltros}
@@ -162,7 +148,6 @@ const Eventos: React.FC = () => {
           )}
         </div>
 
-        {/* Contador de resultados */}
         <div className="text-sm text-gray-500">
           Mostrando {filteredEventos.length} de {eventos.length} eventos
           {dataFiltro && ` para a data ${formatarData(dataFiltro)}`}
@@ -183,7 +168,7 @@ const Eventos: React.FC = () => {
           </p>
           {!searchTerm && !dataFiltro && (
             <Link
-              to="/eventos/novo"
+              to="/admin/eventos/novo"
               className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -198,11 +183,10 @@ const Eventos: React.FC = () => {
               key={evento.id}
               className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Image Gallery */}
               <ImageGallery 
                 imagens={evento.imagens || []} 
                 nome={evento.nome}
-                type="trilha"
+                type="parque"
               />
               
               <div className="p-6">
@@ -225,7 +209,7 @@ const Eventos: React.FC = () => {
 
                 <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
                   <button
-                    onClick={() => navigate(`/eventos/${evento.id}/editar`)}
+                    onClick={() => navigate(`/admin/eventos/${evento.id}/editar`)}
                     className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                   >
                     <Edit className="w-5 h-5" />

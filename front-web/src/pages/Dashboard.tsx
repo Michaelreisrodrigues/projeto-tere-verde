@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trees, Map, Calendar, Leaf, Sparkles, Plus, ArrowRight, Loader2 } from 'lucide-react';
 import { parqueService, trilhaService, eventoService, biodiversidadeService } from '../services/api';
-import { Parque, Trilha, Evento, Biodiversidade } from '../types';
 import toast from 'react-hot-toast';
 
 const Dashboard: React.FC = () => {
@@ -18,17 +17,12 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        console.log('Buscando estatísticas...');
         const [parques, trilhas, eventos, biodiversidades] = await Promise.all([
           parqueService.getAll(),
           trilhaService.getAll(),
           eventoService.getAll(),
           biodiversidadeService.getAll(),
         ]);
-        console.log('Parques:', parques.length);
-        console.log('Trilhas:', trilhas.length);
-        console.log('Eventos:', eventos.length);
-        console.log('Biodiversidade:', biodiversidades.length);
         setStats({
           parques: parques.length,
           trilhas: trilhas.length,
@@ -37,7 +31,6 @@ const Dashboard: React.FC = () => {
           loading: false,
         });
       } catch (error: any) {
-        console.error('Erro ao carregar estatísticas:', error);
         const errorMsg = error.response?.data?.detail || error.message || 'Erro desconhecido';
         setStats((prev) => ({ 
           ...prev, 
@@ -56,7 +49,7 @@ const Dashboard: React.FC = () => {
       count: stats.parques,
       icon: Trees,
       color: 'bg-emerald-500',
-      link: '/parques',
+      link: '/admin/parques',
       description: 'Áreas naturais cadastradas',
     },
     {
@@ -64,7 +57,7 @@ const Dashboard: React.FC = () => {
       count: stats.trilhas,
       icon: Map,
       color: 'bg-blue-500',
-      link: '/trilhas',
+      link: '/admin/trilhas',
       description: 'Caminhos e rotas disponíveis',
     },
     {
@@ -72,7 +65,7 @@ const Dashboard: React.FC = () => {
       count: stats.eventos,
       icon: Calendar,
       color: 'bg-purple-500',
-      link: '/eventos',
+      link: '/admin/eventos',
       description: 'Eventos programados',
     },
     {
@@ -80,16 +73,16 @@ const Dashboard: React.FC = () => {
       count: stats.biodiversidades,
       icon: Leaf,
       color: 'bg-green-500',
-      link: '/biodiversidades',
+      link: '/admin/biodiversidades',
       description: 'Espécies catalogadas',
     },
   ];
 
   const quickActions = [
-    { label: 'Novo Parque', icon: Trees, link: '/parques/novo', color: 'bg-emerald-600' },
-    { label: 'Nova Trilha', icon: Map, link: '/trilhas/nova', color: 'bg-blue-600' },
-    { label: 'Novo Evento', icon: Calendar, link: '/eventos/novo', color: 'bg-purple-600' },
-    { label: 'Nova Espécie', icon: Leaf, link: '/biodiversidades/novo', color: 'bg-green-600' },
+    { label: 'Novo Parque', icon: Trees, link: '/admin/parques/novo', color: 'bg-emerald-600' },
+    { label: 'Nova Trilha', icon: Map, link: '/admin/trilhas/nova', color: 'bg-blue-600' },
+    { label: 'Novo Evento', icon: Calendar, link: '/admin/eventos/novo', color: 'bg-purple-600' },
+    { label: 'Nova Espécie', icon: Leaf, link: '/admin/biodiversidades/novo', color: 'bg-green-600' },
   ];
 
   if (stats.loading) {

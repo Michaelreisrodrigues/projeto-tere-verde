@@ -25,11 +25,11 @@ const Layout: React.FC = () => {
   };
 
   const menuItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/parques', icon: Trees, label: 'Parques' },
-    { path: '/trilhas', icon: Map, label: 'Trilhas' },
-    { path: '/eventos', icon: Calendar, label: 'Eventos' },
-    { path: '/biodiversidades', icon: Leaf, label: 'Biodiversidade' },
+    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/parques', icon: Trees, label: 'Parques' },
+    { path: '/admin/trilhas', icon: Map, label: 'Trilhas' },
+    { path: '/admin/eventos', icon: Calendar, label: 'Eventos' },
+    { path: '/admin/biodiversidades', icon: Leaf, label: 'Biodiversidade' },
   ];
 
   return (
@@ -66,7 +66,7 @@ const Layout: React.FC = () => {
             <nav className="flex-1 px-4 py-6 space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
                 return (
                   <Link
                     key={item.path}

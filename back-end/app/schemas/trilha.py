@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 
 class TrilhaBase(BaseModel):
@@ -7,6 +7,7 @@ class TrilhaBase(BaseModel):
     dificuldade: Optional[str] = None
     distancia: Optional[float] = None
     parque_id: int
+    imagens: Optional[List[str]] = None
 
 
 class TrilhaCreate(TrilhaBase):
@@ -16,6 +17,5 @@ class TrilhaCreate(TrilhaBase):
 class Trilha(TrilhaBase):
     id: int
 
-    model_config = {
-        "from_attributes": True
-    }
+    class Config:
+        from_attributes = True

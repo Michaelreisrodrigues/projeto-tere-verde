@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, JSON
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -9,6 +9,7 @@ class Parque(Base):
     nome = Column(String, index=True, nullable=False)
     localizacao = Column(String, nullable=False)
     descricao = Column(String)
+    imagens = Column(JSON, default=list)
 
     trilhas = relationship("Trilha", back_populates="parque")
     eventos = relationship("Evento", back_populates="parque")

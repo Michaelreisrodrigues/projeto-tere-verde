@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, MapPin, Loader2, Map, Navigation } from 'lucide-react';
 import { trilhaService, parqueService } from '../services/api';
-import { imageStorage } from '../services/imageStorage';
 import { Trilha, Parque } from '../types';
 import ImageGallery from '../components/ImageGallery';
 import toast from 'react-hot-toast';
@@ -41,16 +40,9 @@ const Trilhas: React.FC = () => {
         return acc;
       }, {} as Record<number, string>);
       
-      // Carregar imagens do localStorage e mesclar com os dados
-      const todasImagens = imageStorage.getAllTrilhasImages();
-      const trilhasComImagens = trilhasData.map((trilha: Trilha) => ({
-        ...trilha,
-        imagens: todasImagens[trilha.id] || [],
-      }));
-      
       setParques(parquesMap);
-      setTrilhas(trilhasComImagens);
-      setFilteredTrilhas(trilhasComImagens);
+      setTrilhas(trilhasData);
+      setFilteredTrilhas(trilhasData);
     } catch (error) {
       toast.error('Erro ao carregar trilhas');
     } finally {
@@ -64,8 +56,6 @@ const Trilhas: React.FC = () => {
     setDeleteId(id);
     try {
       await trilhaService.delete(id);
-      // Remover imagens do localStorage
-      imageStorage.removeTrilhaImages(id);
       toast.success('Trilha excluída com sucesso!');
       fetchData();
     } catch (error) {
@@ -79,6 +69,7 @@ const Trilhas: React.FC = () => {
     switch (dificuldade?.toLowerCase()) {
       case 'fácil':
       case 'facil':
+      case 'leve':
         return 'bg-green-100 text-green-800';
       case 'moderada':
       case 'moderado':
@@ -86,6 +77,7 @@ const Trilhas: React.FC = () => {
       case 'difícil':
       case 'dificil':
       case 'dificíl':
+      case 'pesada':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -109,7 +101,7 @@ const Trilhas: React.FC = () => {
           <p className="text-gray-500 mt-1">Gerencie as trilhas e rotas disponíveis</p>
         </div>
         <Link
-          to="/trilhas/nova"
+          to="/admin/trilhas/nova"
           className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -143,7 +135,7 @@ const Trilhas: React.FC = () => {
           </p>
           {!searchTerm && (
             <Link
-              to="/trilhas/nova"
+              to="/admin/trilhas/nova"
               className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -158,7 +150,6 @@ const Trilhas: React.FC = () => {
               key={trilha.id}
               className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Image Gallery */}
               <ImageGallery 
                 imagens={trilha.imagens || []} 
                 nome={trilha.nome}
@@ -190,7 +181,7 @@ const Trilhas: React.FC = () => {
 
                 <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
                   <button
-                    onClick={() => navigate(`/trilhas/${trilha.id}/editar`)}
+                    onClick={() => navigate(`/admin/trilhas/${trilha.id}/editar`)}
                     className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                   >
                     <Edit className="w-5 h-5" />

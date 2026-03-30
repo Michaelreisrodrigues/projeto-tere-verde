@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, Leaf, MapPin, Loader2 } from 'lucide-react';
 import { biodiversidadeService, parqueService } from '../services/api';
-import { imageStorage } from '../services/imageStorage';
 import { Biodiversidade, Parque } from '../types';
 import ImageGallery from '../components/ImageGallery';
 import toast from 'react-hot-toast';
@@ -42,16 +41,9 @@ const Biodiversidades: React.FC = () => {
         return acc;
       }, {} as Record<number, string>);
       
-      // Carregar imagens do localStorage e mesclar com os dados
-      const todasImagens = imageStorage.getAllBiodiversidadesImages();
-      const biodiversidadesComImagens = biodiversidadesData.map((bio: Biodiversidade) => ({
-        ...bio,
-        imagens: todasImagens[bio.id] || [],
-      }));
-      
       setParques(parquesMap);
-      setBiodiversidades(biodiversidadesComImagens);
-      setFilteredBiodiversidades(biodiversidadesComImagens);
+      setBiodiversidades(biodiversidadesData);
+      setFilteredBiodiversidades(biodiversidadesData);
     } catch (error) {
       toast.error('Erro ao carregar biodiversidade');
     } finally {
@@ -65,8 +57,6 @@ const Biodiversidades: React.FC = () => {
     setDeleteId(id);
     try {
       await biodiversidadeService.delete(id);
-      // Remover imagens do localStorage
-      imageStorage.removeBiodiversidadeImages(id);
       toast.success('Registro excluído com sucesso!');
       fetchData();
     } catch (error) {
@@ -104,7 +94,7 @@ const Biodiversidades: React.FC = () => {
           <p className="text-gray-500 mt-1">Gerencie a fauna e flora dos parques</p>
         </div>
         <Link
-          to="/biodiversidades/novo"
+          to="/admin/biodiversidades/novo"
           className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -138,7 +128,7 @@ const Biodiversidades: React.FC = () => {
           </p>
           {!searchTerm && (
             <Link
-              to="/biodiversidades/novo"
+              to="/admin/biodiversidades/novo"
               className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -153,11 +143,10 @@ const Biodiversidades: React.FC = () => {
               key={bio.id}
               className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Image Gallery */}
               <ImageGallery 
                 imagens={bio.imagens || []} 
                 nome={bio.especie}
-                type="trilha"
+                type="parque"
               />
               
               <div className="p-6">
@@ -181,7 +170,7 @@ const Biodiversidades: React.FC = () => {
 
                 <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
                   <button
-                    onClick={() => navigate(`/biodiversidades/${bio.id}/editar`)}
+                    onClick={() => navigate(`/admin/biodiversidades/${bio.id}/editar`)}
                     className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                   >
                     <Edit className="w-5 h-5" />
