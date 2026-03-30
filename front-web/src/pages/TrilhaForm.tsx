@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Loader2, Map, X, ImagePlus } from 'lucide-react';
 import { trilhaService, parqueService } from '../services/api';
-import { imageStorage } from '../services/imageStorage';
 import { imageCompression } from '../services/imageCompression';
 import { TrilhaCreate, Parque } from '../types';
 import toast from 'react-hot-toast';
@@ -48,18 +47,16 @@ const TrilhaForm: React.FC = () => {
   const fetchTrilha = async (trilhaId: number) => {
     try {
       const trilha = await trilhaService.getById(trilhaId);
-      // Carregar imagens do localStorage
-      const imagensSalvas = imageStorage.getTrilhaImages(trilhaId);
       setFormData({
         nome: trilha.nome,
         dificuldade: trilha.dificuldade || '',
         distancia: trilha.distancia,
         parque_id: trilha.parque_id,
-        imagens: imagensSalvas,
+        imagens: trilha.imagens || [],
       });
     } catch (error) {
       toast.error('Erro ao carregar trilha');
-      navigate('/trilhas');
+      navigate('/admin/trilhas');
     } finally {
       setIsFetching(false);
     }
@@ -105,44 +102,28 @@ const TrilhaForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Enviar dados sem imagens para o backend (ele não suporta ainda)
-      const { imagens, ...dadosSemImagens } = formData;
-      
-      // Comprimir imagens antes de salvar (para caber no localStorage)
+      // Comprimir imagens antes de enviar
       let imagensComprimidas: string[] = [];
-      if (imagens && imagens.length > 0) {
-        console.log('Comprimindo imagens...');
+      if (formData.imagens && formData.imagens.length > 0) {
         toast.loading('Comprimindo imagens...', { id: 'compressing' });
-        imagensComprimidas = await imageCompression.processImages(imagens, 3, 600, 0.6);
+        imagensComprimidas = await imageCompression.processImages(formData.imagens, 5, 800, 0.7);
         toast.dismiss('compressing');
-        console.log('Imagens comprimidas:', imagensComprimidas.length);
       }
-      
+
       const dataToSend = {
-        ...dadosSemImagens,
+        ...formData,
+        imagens: imagensComprimidas,
         distancia: formData.distancia ? Number(formData.distancia) : undefined,
       };
 
       if (isEditing && id) {
         await trilhaService.update(parseInt(id), dataToSend);
-        // Salvar imagens no localStorage
-        const salvou = imageStorage.saveTrilhaImages(parseInt(id), imagensComprimidas);
-        if (!salvou) {
-          toast.error('Erro ao salvar imagens. Espaço insuficiente.');
-        }
         toast.success('Trilha atualizada com sucesso!');
       } else {
-        const novaTrilha = await trilhaService.create(dataToSend);
-        // Salvar imagens no localStorage com o ID da nova trilha
-        if (novaTrilha && novaTrilha.id) {
-          const salvou = imageStorage.saveTrilhaImages(novaTrilha.id, imagensComprimidas);
-          if (!salvou) {
-            toast.error('Trilha criada, mas houve erro ao salvar imagens.');
-          }
-        }
+        await trilhaService.create(dataToSend);
         toast.success('Trilha criada com sucesso!');
       }
-      navigate('/trilhas');
+      navigate('/admin/trilhas');
     } catch (error) {
       toast.error(isEditing ? 'Erro ao atualizar trilha' : 'Erro ao criar trilha');
     } finally {
@@ -182,7 +163,7 @@ const TrilhaForm: React.FC = () => {
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Nenhum parque cadastrado</h2>
         <p className="text-gray-500 mb-6">Você precisa cadastrar pelo menos um parque antes de criar uma trilha.</p>
         <button
-          onClick={() => navigate('/parques/novo')}
+          onClick={() => navigate('/admin/parques/novo')}
           className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
           Cadastrar Parque
@@ -193,9 +174,8 @@ const TrilhaForm: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Header */}
       <button
-        onClick={() => navigate('/trilhas')}
+        onClick={() => navigate('/admin/trilhas')}
         className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
@@ -273,6 +253,8 @@ const TrilhaForm: React.FC = () => {
                 <option value="Fácil">Fácil</option>
                 <option value="Moderada">Moderada</option>
                 <option value="Difícil">Difícil</option>
+                <option value="Leve">Leve</option>
+                <option value="Pesada">Pesada</option>
               </select>
             </div>
 
@@ -294,16 +276,17 @@ const TrilhaForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Image Upload Section */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Imagens da Trilha
+              {formData.imagens && formData.imagens.length > 0 && (
+                <span className="text-primary-600 ml-2">({formData.imagens.length} imagens)</span>
+              )}
             </label>
             <p className="text-xs text-gray-500 mb-2">
-              Máximo 3 imagens. Serão comprimidas automaticamente para economizar espaço.
+              Máximo 5 imagens. Serão comprimidas automaticamente.
             </p>
             
-            {/* Image Preview Grid */}
             {formData.imagens && formData.imagens.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
                 {formData.imagens.map((imagem, index) => (
@@ -325,7 +308,6 @@ const TrilhaForm: React.FC = () => {
               </div>
             )}
 
-            {/* Upload Button */}
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <ImagePlus className="w-8 h-8 text-gray-400 mb-2" />
@@ -345,7 +327,7 @@ const TrilhaForm: React.FC = () => {
           <div className="flex gap-4 pt-4">
             <button
               type="button"
-              onClick={() => navigate('/trilhas')}
+              onClick={() => navigate('/admin/trilhas')}
               className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancelar

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -9,6 +9,7 @@ class Biodiversidade(Base):
     especie = Column(String, nullable=False)
     tipo = Column(String)  # flora, fauna
     descricao = Column(String)
+    imagens = Column(JSON, default=list)
 
     parque_id = Column(Integer, ForeignKey("parques.id"))
     parque = relationship("Parque", back_populates="biodiversidades")

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Loader2, Calendar, X, ImagePlus } from 'lucide-react';
 import { eventoService, parqueService } from '../services/api';
-import { imageStorage } from '../services/imageStorage';
 import { imageCompression } from '../services/imageCompression';
 import { EventoCreate, Parque } from '../types';
 import toast from 'react-hot-toast';
@@ -48,18 +47,16 @@ const EventoForm: React.FC = () => {
   const fetchEvento = async (eventoId: number) => {
     try {
       const evento = await eventoService.getById(eventoId);
-      // Carregar imagens do localStorage
-      const imagensSalvas = imageStorage.getEventoImages(eventoId);
       setFormData({
         nome: evento.nome,
         descricao: evento.descricao,
         data: evento.data,
         parque_id: evento.parque_id,
-        imagens: imagensSalvas,
+        imagens: evento.imagens || [],
       });
     } catch (error) {
       toast.error('Erro ao carregar evento');
-      navigate('/eventos');
+      navigate('/admin/eventos');
     } finally {
       setIsFetching(false);
     }
@@ -110,39 +107,27 @@ const EventoForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Enviar dados sem imagens para o backend (ele não suporta ainda)
-      const { imagens, ...dadosSemImagens } = formData;
-      
-      // Comprimir imagens antes de salvar (para caber no localStorage)
+      // Comprimir imagens antes de enviar
       let imagensComprimidas: string[] = [];
-      if (imagens && imagens.length > 0) {
-        console.log('Comprimindo imagens...');
+      if (formData.imagens && formData.imagens.length > 0) {
         toast.loading('Comprimindo imagens...', { id: 'compressing' });
-        imagensComprimidas = await imageCompression.processImages(imagens, 3, 600, 0.6);
+        imagensComprimidas = await imageCompression.processImages(formData.imagens, 5, 800, 0.7);
         toast.dismiss('compressing');
-        console.log('Imagens comprimidas:', imagensComprimidas.length);
       }
 
+      const dataToSend = {
+        ...formData,
+        imagens: imagensComprimidas,
+      };
+
       if (isEditing && id) {
-        await eventoService.update(parseInt(id), dadosSemImagens);
-        // Salvar imagens no localStorage
-        const salvou = imageStorage.saveEventoImages(parseInt(id), imagensComprimidas);
-        if (!salvou) {
-          toast.error('Erro ao salvar imagens. Espaço insuficiente.');
-        }
+        await eventoService.update(parseInt(id), dataToSend);
         toast.success('Evento atualizado com sucesso!');
       } else {
-        const novoEvento = await eventoService.create(dadosSemImagens);
-        // Salvar imagens no localStorage com o ID do novo evento
-        if (novoEvento && novoEvento.id) {
-          const salvou = imageStorage.saveEventoImages(novoEvento.id, imagensComprimidas);
-          if (!salvou) {
-            toast.error('Evento criado, mas houve erro ao salvar imagens.');
-          }
-        }
+        await eventoService.create(dataToSend);
         toast.success('Evento criado com sucesso!');
       }
-      navigate('/eventos');
+      navigate('/admin/eventos');
     } catch (error) {
       toast.error(isEditing ? 'Erro ao atualizar evento' : 'Erro ao criar evento');
     } finally {
@@ -174,7 +159,7 @@ const EventoForm: React.FC = () => {
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Nenhum parque cadastrado</h2>
         <p className="text-gray-500 mb-6">Você precisa cadastrar pelo menos um parque antes de criar um evento.</p>
         <button
-          onClick={() => navigate('/parques/novo')}
+          onClick={() => navigate('/admin/parques/novo')}
           className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
           Cadastrar Parque
@@ -185,9 +170,8 @@ const EventoForm: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Header */}
       <button
-        onClick={() => navigate('/eventos')}
+        onClick={() => navigate('/admin/eventos')}
         className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
@@ -280,22 +264,18 @@ const EventoForm: React.FC = () => {
             />
           </div>
 
-          {/* Image Upload Section */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Imagens do Evento 
+              Imagens do Evento
               {formData.imagens && formData.imagens.length > 0 && (
-                <span className="text-primary-600 ml-2">
-                  ({formData.imagens.length} imagens)
-                </span>
+                <span className="text-primary-600 ml-2">({formData.imagens.length} imagens)</span>
               )}
             </label>
             <p className="text-xs text-gray-500 mb-2">
-              Máximo 3 imagens. Serão comprimidas automaticamente para economizar espaço.
+              Máximo 5 imagens. Serão comprimidas automaticamente.
             </p>
             
-            {/* Image Preview Grid */}
-            {formData.imagens && formData.imagens.length > 0 ? (
+            {formData.imagens && formData.imagens.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
                 {formData.imagens.map((imagem, index) => (
                   <div key={index} className="relative group">
@@ -314,15 +294,8 @@ const EventoForm: React.FC = () => {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                <p className="text-yellow-700 text-sm">
-                  Nenhuma imagem adicionada ainda.
-                </p>
-              </div>
             )}
 
-            {/* Upload Button */}
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <ImagePlus className="w-8 h-8 text-gray-400 mb-2" />
@@ -342,7 +315,7 @@ const EventoForm: React.FC = () => {
           <div className="flex gap-4 pt-4">
             <button
               type="button"
-              onClick={() => navigate('/eventos')}
+              onClick={() => navigate('/admin/eventos')}
               className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancelar

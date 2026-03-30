@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware # 1. Importação necessária
-from .database import engine, Base
+from app.database import engine, Base
 from app.routers import parque, evento, administrador, biodiversidade, trilha
 from app.routers.login_router import router as login_router
 

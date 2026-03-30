@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, MapPin, Loader2, Trees } from 'lucide-react';
 import { parqueService } from '../services/api';
-import { imageStorage } from '../services/imageStorage';
 import { Parque } from '../types';
 import ImageGallery from '../components/ImageGallery';
 import toast from 'react-hot-toast';
@@ -30,27 +29,10 @@ const Parques: React.FC = () => {
 
   const fetchParques = async () => {
     try {
-      console.log('=== CARREGANDO PARQUES ===');
       const data = await parqueService.getAll();
-      console.log('Parques carregados do backend:', data.length);
-      
-      // Carregar imagens do localStorage e mesclar com os dados
-      const todasImagens = imageStorage.getAllParquesImages();
-      console.log('Todas as imagens no localStorage:', Object.keys(todasImagens));
-      
-      const parquesComImagens = data.map((parque: Parque) => {
-        const imagensDoParque = todasImagens[parque.id] || [];
-        console.log(`Parque ID ${parque.id} (${parque.nome}):`, imagensDoParque.length, 'imagens');
-        return {
-          ...parque,
-          imagens: imagensDoParque,
-        };
-      });
-      
-      setParques(parquesComImagens);
-      setFilteredParques(parquesComImagens);
+      setParques(data);
+      setFilteredParques(data);
     } catch (error) {
-      console.error('Erro ao carregar parques:', error);
       toast.error('Erro ao carregar parques');
     } finally {
       setIsLoading(false);
@@ -63,8 +45,6 @@ const Parques: React.FC = () => {
     setDeleteId(id);
     try {
       await parqueService.delete(id);
-      // Remover imagens do localStorage
-      imageStorage.removeParqueImages(id);
       toast.success('Parque excluído com sucesso!');
       fetchParques();
     } catch (error) {
@@ -88,10 +68,10 @@ const Parques: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Parques</h1>
-          <p className="text-gray-500 mt-1">Gerencie as áreas naturais do sistema</p>
+          <p className="text-gray-500 mt-1">Gerencie os parques naturais cadastrados</p>
         </div>
         <Link
-          to="/parques/novo"
+          to="/admin/parques/novo"
           className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -125,7 +105,7 @@ const Parques: React.FC = () => {
           </p>
           {!searchTerm && (
             <Link
-              to="/parques/novo"
+              to="/admin/parques/novo"
               className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -140,7 +120,6 @@ const Parques: React.FC = () => {
               key={parque.id}
               className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Image Gallery */}
               <ImageGallery 
                 imagens={parque.imagens || []} 
                 nome={parque.nome}
@@ -149,16 +128,16 @@ const Parques: React.FC = () => {
               
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{parque.nome}</h3>
-                <div className="flex items-center text-gray-500 text-sm mb-4">
-                  <MapPin className="w-4 h-4 mr-1" />
+                <div className="flex items-center text-gray-500 text-sm mb-3">
+                  <MapPin className="w-4 h-4 mr-2" />
                   {parque.localizacao}
                 </div>
                 {parque.descricao && (
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{parque.descricao}</p>
+                  <p className="text-gray-600 text-sm line-clamp-2 mb-4">{parque.descricao}</p>
                 )}
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
                   <button
-                    onClick={() => navigate(`/parques/${parque.id}/editar`)}
+                    onClick={() => navigate(`/admin/parques/${parque.id}/editar`)}
                     className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                   >
                     <Edit className="w-5 h-5" />

@@ -6,6 +6,7 @@ class ParqueBase(BaseModel):
     nome: str
     localizacao: str
     descricao: Optional[str] = None
+    imagens: Optional[List[str]] = None
 
 
 class ParqueCreate(ParqueBase):

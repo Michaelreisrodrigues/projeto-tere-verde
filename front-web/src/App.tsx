@@ -4,8 +4,12 @@ import { useAuth } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
 
-// Pages
+// Public Pages
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+import Visitante from './pages/Visitante';
+
+// Admin Pages
 import Dashboard from './pages/Dashboard';
 import Parques from './pages/Parques';
 import ParqueForm from './pages/ParqueForm';
@@ -22,14 +26,16 @@ const App: React.FC = () => {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<LandingPage />} />
       <Route 
         path="/login" 
-        element={isAuthenticated ? <Navigate to="/" /> : <Login />} 
+        element={isAuthenticated ? <Navigate to="/admin" /> : <Login />} 
       />
+      <Route path="/visitante" element={<Visitante />} />
 
-      {/* Protected Routes com Layout */}
+      {/* Protected Admin Routes */}
       <Route element={<PrivateRoute />}>
-        <Route path="/" element={<Layout />}>
+        <Route path="/admin" element={<Layout />}>
           <Route index element={<Dashboard />} />
           
           {/* Parques Routes */}
