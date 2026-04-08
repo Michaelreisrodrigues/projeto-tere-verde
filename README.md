@@ -1,10 +1,11 @@
-🌲 Projeto Tere Verde
+## 🌲 Projeto Tere Verde
 
 O Tere Verde é um ecossistema digital completo projetado para o gerenciamento e exploração do ecoturismo e da biodiversidade na cidade de Teresópolis. O projeto integra uma API robusta, um painel administrativo para gestores e um aplicativo móvel para turistas e moradores.
 
 Este é um projeto acadêmico desenvolvido para o curso de Análise e Desenvolvimento de Sistemas – UNIFESO.
 
-📌 Índice
+## 📌 Índice
+
 📖 Sobre o Projeto
 
 👥 Equipe
@@ -19,7 +20,9 @@ Este é um projeto acadêmico desenvolvido para o curso de Análise e Desenvolvi
 
 🔐 Credenciais de Teste
 
-📖 Sobre o Projeto
+
+## Sobre o Projeto
+
 A plataforma centraliza dados ambientais de Teresópolis para promover o turismo sustentável e a preservação. O sistema permite:
 
 Gestão Administrativa (Web): Cadastro e controle de parques, trilhas, biodiversidade e eventos.
@@ -28,21 +31,22 @@ Exploração Turística (Mobile): Guia de bolso para consulta de trilhas e agend
 
 Segurança: Acesso restrito via Token JWT para operações de escrita.
 
-👥 Equipe
+## 👥 Equipe
+
 Michael Reis – Back-end & Segurança.
 
 Matheus Menezes – Desenvolvimento Front-end Web.
 
 Uillian da Silva – Desenvolvimento Mobile.
 
-🚀 Tecnologias Utilizadas
+## 🚀 Tecnologias Utilizadas
 Back-end
 Python & FastAPI | SQLAlchemy (ORM) | SQLite | JWT & Bcrypt
 
 Front-end & Mobile
 React (Web) | React Native & Expo (Mobile) | Vite | Tailwind CSS
 
-🧱 Arquitetura do Sistema
+## 🧱 Arquitetura do Sistema
 O projeto utiliza uma estrutura de Monorepo para manter a sincronia entre as plataformas:
 
 Plaintext
@@ -56,7 +60,9 @@ Plaintext
 │   └── seed.py           # Script para popular o banco inicial
 ├── 📁 front-web/         # Painel Administrativo (React)
 └── 📁 mobile/            # App do Visitante (React Native/Expo)
-✅ Requisitos e Regras
+
+
+## ✅ Requisitos e Regras
 Requisitos Funcionais (RF)
 RF01: Listar e detalhar parques e trilhas.
 
@@ -80,7 +86,9 @@ RN02: Visitantes possuem acesso apenas de leitura.
 
 RN03: Criptografia de senhas (Hash) para todos os administradores.
 
-📦 Instalação e Execução
+
+## 📦 Instalação e Execução
+
 1. Back-end
 PowerShell
 cd back-end
