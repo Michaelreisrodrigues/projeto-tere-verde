@@ -62,8 +62,8 @@ Plaintext
 └── 📁 mobile/            # App do Visitante (React Native/Expo)
 
 
-## ✅ Requisitos e Regras
-Requisitos Funcionais (RF)
+
+## ✅ Requisitos Funcionais (RF)
 RF01: Listar e detalhar parques e trilhas.
 
 RF02: Catalogar espécies da fauna e flora local.
@@ -72,14 +72,14 @@ RF03: Gerenciar agenda de eventos ambientais.
 
 RF04: Login seguro e CRUD completo para administradores.
 
-Requisitos Não Funcionais (RNF)
+## Requisitos Não Funcionais (RNF)
 RNF01: Autenticação via Token JWT.
 
 RNF02: Persistência em banco SQLite.
 
 RNF03: Documentação automática via Swagger UI (/docs).
 
-Regras de Negócio (RN)
+## Regras de Negócio (RN)
 RN01: Trilhas devem estar obrigatoriamente vinculadas a um parque.
 
 RN02: Visitantes possuem acesso apenas de leitura.
