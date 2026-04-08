@@ -1,4 +1,5 @@
 🌲 Projeto Tere Verde
+
 O Tere Verde é um ecossistema digital completo projetado para o gerenciamento e exploração do ecoturismo e da biodiversidade na cidade de Teresópolis. O projeto integra uma API robusta, um painel administrativo para gestores e um aplicativo móvel para turistas e moradores.
 
 Este é um projeto acadêmico desenvolvido para o curso de Análise e Desenvolvimento de Sistemas – UNIFESO.
