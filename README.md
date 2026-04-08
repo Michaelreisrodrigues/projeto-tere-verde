@@ -97,13 +97,17 @@ python -m venv venv
 pip install -r requirements.txt
 python -m app.seed
 python -m uvicorn app.main:app --reload
+
 2. Front-web / Mobile
 PowerShell
-# Em suas respectivas pastas:
+
+## Em suas respectivas pastas:
 npm install
 npm run dev # Para Web
 npm start   # Para Mobile
-🔐 Credenciais de Teste (Admin)
+
+
+## 🔐 Credenciais de Teste (Admin)
 E-mail: admin@tereverde.com
 
 Senha: admin123
